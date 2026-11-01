@@ -360,11 +360,11 @@ html_code = """
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
                         <h2 class="text-2xl font-black text-rose-300 mb-1">📊 مصفوفة المحاضرات التفاعلية</h2>
-                        <p class="text-sm text-slate-400">اضغط على أي خلية لتغيير حالتها (رمادي ➡️ أحمر ➡️ أصفر).</p>
+                        <p class="text-sm text-slate-400">الأصفر = تم الإنجاز ✅ | الأحمر = غير منجز ❌</p>
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="bg-slate-900/90 border border-rose-500/40 px-3 py-1.5 rounded-xl text-center">
-                            <span class="text-[10px] text-slate-400 block">الإنجاز</span>
+                            <span class="text-[10px] text-slate-400 block">إنجاز الأصفر</span>
                             <span id="matrix-progress-val" class="text-sm font-bold text-rose-300">0%</span>
                         </div>
                         <button type="button" onclick="addLectureRow()" class="glass-btn px-3 py-2 rounded-xl font-bold text-xs text-rose-300 cursor-pointer">➕ صف جديد</button>
@@ -512,19 +512,19 @@ html_code = """
             const plansValEl = document.getElementById('plans-progress-val');
             if(plansValEl) plansValEl.textContent = `${plansPct}%`;
 
-            // 4. Matrix Progress
+            // 4. Matrix Progress (Calculated ONLY based on Yellow color = 2)
             let matrixTotalCells = matrixRowsCount * 5;
-            let matrixDoneCells = 0;
+            let matrixYellowCells = 0;
             for(let key in matrixData) {
-                if(matrixData[key] === 1 || matrixData[key] === 2) matrixDoneCells++;
+                if(matrixData[key] === 2) matrixYellowCells++;
             }
-            let matrixPct = matrixTotalCells === 0 ? 0 : Math.round((matrixDoneCells / matrixTotalCells) * 100);
+            let matrixPct = matrixTotalCells === 0 ? 0 : Math.round((matrixYellowCells / matrixTotalCells) * 100);
             const matrixValEl = document.getElementById('matrix-progress-val');
             if(matrixValEl) matrixValEl.textContent = `${matrixPct}%`;
 
             // Combined Global
             total = tasksTotal + backlogTotal + plansTotal + matrixTotalCells;
-            completed = tasksDone + backlogDone + plansDone + matrixDoneCells;
+            completed = tasksDone + backlogDone + plansDone + matrixYellowCells;
 
             const globalPct = total === 0 ? 0 : Math.round((completed / total) * 100);
             
