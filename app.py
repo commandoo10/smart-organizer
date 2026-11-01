@@ -300,13 +300,43 @@ html_code = """
             </div>
         </section>
 
+        <!-- Lesson Modal -->
+        <div id="lesson-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 hidden p-4">
+            <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-md w-full border border-blue-500/30 space-y-5 shadow-2xl relative">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                    <h3 id="modal-title" class="text-xl font-bold text-blue-300">إضافة / تعديل درس</h3>
+                    <button onclick="closeLessonModal()" class="text-slate-400 hover:text-white text-xl">✕</button>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">اسم المادة / الدرس</label>
+                        <input type="text" id="modal-lesson-subject" placeholder="مثال: فيزياء - د/ أحمد" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">الموعد والوقت</label>
+                        <input type="text" id="modal-lesson-time" placeholder="مثال: 04:00 مساءً" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button onclick="saveLessonFromModal()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-600/30">
+                        💾 حفظ الدرس
+                    </button>
+                    <button onclick="closeLessonModal()" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold transition-all border border-slate-700">
+                        إلغاء
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- SECTION: MATRIX -->
         <section id="section-matrix" class="glass-card rounded-3xl p-6 sm:p-8 hidden">
             <div class="space-y-6">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
                         <h2 class="text-2xl font-black text-rose-300 mb-2">📊 مصفوفة المحاضرات التفاعلية</h2>
-                        <p class="text-sm text-slate-400">اضغط على أي خلية لتغيير حالتها (رمادي ➡️ أحمر ➡️ أصفر).</p>
+                        <p class="text-sm text-slate-400">اضغط على أي خلية لتغيير حالتها (رمادي فارغ ➡️ أحمر غير منجز ➡️ أصفر منجز).</p>
                     </div>
                     <div class="flex items-center gap-3">
                         <button type="button" onclick="addLectureRow()" class="glass-btn px-4 py-2 rounded-xl font-bold text-xs text-rose-300 cursor-pointer">➕ إضافة صف جديد</button>
@@ -328,6 +358,11 @@ html_code = """
     </div>
 
     <script>
+        const dayNames = {
+            sat: "السبت", sun: "الأحد", mon: "الإثنين", tue: "الثلاثاء", wed: "الأربعاء", thu: "الخميس", fri: "الجمعة"
+        };
+        const dayKeys = ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'];
+
         function switchSection(sectionId) {
             const dashboard = document.getElementById('home-dashboard');
             const backNav = document.getElementById('back-nav');
@@ -523,11 +558,192 @@ html_code = """
             renderTasks();
         }
 
+        // --- LESSONS SCHEDULE LOGIC ---
+        let lessons = JSON.parse(localStorage.getItem('smart_org_lessons')) || {
+            sat: [{ id: 1, subject: 'فيزياء - د/ أحمد', time: '04:00 مساءً' }],
+            sun: [{ id: 2, subject: 'كيمياء - د/ محمود', time: '06:00 مساءً' }],
+            mon: [], tue: [], wed: [], thu: [], fri: []
+        };
+        let activeTargetDay = null;
+        let activeTargetLessonId = null;
+
+        function renderLessons() {
+            const grid = document.getElementById('lessons-days-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            dayKeys.forEach(day => {
+                const dayCard = document.createElement('div');
+                dayCard.className = "glass-card rounded-2xl p-5 border border-slate-700/60 flex flex-col justify-between";
+                const dayLessons = lessons[day] || [];
+                
+                let listHtml = dayLessons.map(l => `
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700/80 flex items-center justify-between mb-2">
+                        <div>
+                            <div class="font-bold text-sm text-blue-300">${l.subject}</div>
+                            <div class="text-xs text-slate-400 mt-0.5">⏰ ${l.time}</div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="openEditLessonModal('${day}', ${l.id})" class="p-1 text-slate-400 hover:text-blue-400 text-xs">✏️</button>
+                            <button onclick="deleteLesson('${day}', ${l.id})" class="p-1 text-slate-400 hover:text-rose-400 text-xs">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                dayCard.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-700 pb-3 mb-3">
+                            <h4 class="font-bold text-lg text-slate-100">${dayNames[day]}</h4>
+                            <span class="text-xs bg-blue-500/20 text-blue-300 px-2.5 py-1 rounded-lg font-bold">${dayLessons.length}</span>
+                        </div>
+                        <div class="space-y-2 max-h-48 overflow-y-auto">${listHtml || '<p class="text-xs text-slate-500 py-2">لا يوجد دروس مضافة</p>'}</div>
+                    </div>
+                    <button onclick="openAddLessonModal('${day}')" class="mt-4 w-full py-2 bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/30 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1 cursor-pointer">
+                        ➕ إضافة درس
+                    </button>
+                `;
+                grid.appendChild(dayCard);
+            });
+            localStorage.setItem('smart_org_lessons', JSON.stringify(lessons));
+        }
+
+        function openAddLessonModal(day) {
+            activeTargetDay = day;
+            activeTargetLessonId = null;
+            document.getElementById('modal-title').textContent = 'إضافة درس';
+            document.getElementById('modal-lesson-subject').value = '';
+            document.getElementById('modal-lesson-time').value = '';
+            document.getElementById('lesson-modal').classList.remove('hidden');
+        }
+
+        function openEditLessonModal(day, id) {
+            activeTargetDay = day;
+            activeTargetLessonId = id;
+            const target = (lessons[day] || []).find(l => l.id === id);
+            if (!target) return;
+            document.getElementById('modal-title').textContent = 'تعديل درس';
+            document.getElementById('modal-lesson-subject').value = target.subject;
+            document.getElementById('modal-lesson-time').value = target.time;
+            document.getElementById('lesson-modal').classList.remove('hidden');
+        }
+
+        function closeLessonModal() {
+            document.getElementById('lesson-modal').classList.add('hidden');
+        }
+
+        function saveLessonFromModal() {
+            const subject = document.getElementById('modal-lesson-subject').value.trim();
+            const time = document.getElementById('modal-lesson-time').value.trim();
+            if (!subject || !time || !activeTargetDay) return;
+
+            if (!lessons[activeTargetDay]) lessons[activeTargetDay] = [];
+
+            if (activeTargetLessonId) {
+                lessons[activeTargetDay] = lessons[activeTargetDay].map(l => 
+                    l.id === activeTargetLessonId ? { ...l, subject, time } : l
+                );
+            } else {
+                lessons[activeTargetDay].push({ id: Date.now(), subject, time });
+            }
+
+            closeLessonModal();
+            renderLessons();
+        }
+
+        function deleteLesson(day, id) {
+            if (!lessons[day]) return;
+            lessons[day] = lessons[day].filter(l => l.id !== id);
+            renderLessons();
+        }
+
+        // --- LECTURE MATRIX LOGIC ---
+        let matrixSubjects = JSON.parse(localStorage.getItem('smart_org_matrix_subjects')) || ['رياضة', 'عربي', 'كيمياء', 'فيزياء', 'أحياء'];
+        let matrixRowsCount = parseInt(localStorage.getItem('smart_org_matrix_rows')) || 18;
+        let matrixData = JSON.parse(localStorage.getItem('smart_org_matrix_data')) || {};
+
+        function renderMatrixHeaders() {
+            const tr = document.getElementById('matrix-header-row');
+            if (!tr) return;
+            tr.innerHTML = `<th class="p-3 border-r border-slate-700 bg-slate-900 w-24">#</th>`;
+            matrixSubjects.forEach((sub, idx) => {
+                tr.innerHTML += `
+                    <th class="p-3 border-r border-slate-700 min-w-[120px]">
+                        <input type="text" value="${sub}" onchange="updateMatrixSubject(${idx}, this.value)" class="bg-transparent text-center font-bold text-white focus:outline-none focus:bg-slate-800 rounded px-1 w-full">
+                    </th>
+                `;
+            });
+        }
+
+        function updateMatrixSubject(index, value) {
+            matrixSubjects[index] = value;
+            localStorage.setItem('smart_org_matrix_subjects', JSON.stringify(matrixSubjects));
+        }
+
+        function renderMatrixBody() {
+            const tbody = document.getElementById('matrix-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            for (let r = 1; r <= matrixRowsCount; r++) {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 transition-colors";
+                
+                let rowCells = `<td class="p-3 font-bold text-slate-400 bg-slate-900/60 border-r border-slate-700/80">المحاضرة ${r}</td>`;
+                
+                for (let c = 0; c < 5; c++) {
+                    const key = `${r}_${c}`;
+                    const state = matrixData[key] || 0; // 0: empty, 1: red, 2: yellow
+                    
+                    let bgClass = "bg-slate-800/30 text-slate-500 hover:bg-slate-800/80";
+                    let stateText = "";
+                    if (state === 1) {
+                        bgClass = "bg-rose-600 font-bold text-white shadow-inner";
+                        stateText = `المحاضرة ${r}`;
+                    } else if (state === 2) {
+                        bgClass = "bg-amber-400 font-black text-slate-950 shadow-inner";
+                        stateText = `المحاضرة ${r}`;
+                    }
+
+                    rowCells += `
+                        <td onclick="cycleCellState(${r}, ${c})" class="p-3 border-r border-slate-700/80 cursor-pointer transition-all duration-200 select-none ${bgClass}">
+                            ${stateText}
+                        </td>
+                    `;
+                }
+
+                tr.innerHTML = rowCells;
+                tbody.appendChild(tr);
+            }
+
+            localStorage.setItem('smart_org_matrix_data', JSON.stringify(matrixData));
+            localStorage.setItem('smart_org_matrix_rows', matrixRowsCount);
+        }
+
+        function cycleCellState(row, col) {
+            const key = `${row}_${col}`;
+            const currentState = matrixData[key] || 0;
+            const newState = (currentState + 1) % 3;
+            matrixData[key] = newState;
+            renderMatrixBody();
+        }
+
+        function addLectureRow() {
+            matrixRowsCount++;
+            renderMatrixBody();
+        }
+
+        function resetMatrix() {
+            matrixData = {};
+            renderMatrixBody();
+        }
+
         // --- ENTER KEY SUPPORT FOR FAST ADDING ---
         document.addEventListener('DOMContentLoaded', () => {
             renderBacklog();
             renderPlans();
             renderTasks();
+            renderLessons();
+            renderMatrixHeaders();
+            renderMatrixBody();
 
             const taskInput = document.getElementById('task-input');
             if(taskInput) {
