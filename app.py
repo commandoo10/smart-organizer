@@ -102,7 +102,7 @@ html_code = """
 
     <div class="container mx-auto px-4 py-6 max-w-6xl relative z-10">
 
-        <!-- Header & Progress Bar Overlay -->
+        <!-- Header & Global Progress -->
         <header class="glass-card rounded-2xl p-5 mb-8 flex flex-col gap-4">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
@@ -110,16 +110,22 @@ html_code = """
                         ✨
                     </div>
                     <div>
-                        <h1 class="text-2xl font-black tracking-wide glow-text">المنظم الذكي</h1>
-                        <p class="text-xs text-slate-400">نظام إنتاجية متطور لمتابعة الدروس والمتراكم والحل</p>
+                        <h1 class="text-2xl font-black tracking-wide glow-text" id="app-title">المنظم الذكي</h1>
+                        <p class="text-xs text-slate-400" id="app-subtitle">نظام إنتاجية متطور مع إحصاءات الإنجاز الشاملة</p>
                     </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleLanguage()" class="glass-btn px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 shadow-md cursor-pointer">
+                        🌐 <span id="lang-btn-text">English</span>
+                    </button>
                 </div>
             </div>
 
             <!-- Global Progress Tracker -->
             <div class="bg-slate-900/80 rounded-xl p-3 border border-slate-700/70">
                 <div class="flex justify-between items-center mb-1.5 text-xs font-bold">
-                    <span class="text-cyan-300">📊 نسبة الإنجاز الكلية للمهام والدروس</span>
+                    <span class="text-cyan-300" id="global-prog-label">📊 نسبة الإنجاز الإجمالية للتطبيق</span>
                     <span id="global-progress-percent" class="text-emerald-400 font-black">0%</span>
                 </div>
                 <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden p-0.5 border border-slate-700">
@@ -133,59 +139,65 @@ html_code = """
             <div onclick="switchSection('backlog')" class="glass-card rounded-2xl p-6 cursor-pointer hover:border-amber-500/50 transition-all duration-300 group relative overflow-hidden">
                 <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-amber-500/20 rounded-full blur-2xl group-hover:bg-amber-500/40 transition-all"></div>
                 <div class="text-3xl mb-3 p-3 bg-amber-500/20 w-fit rounded-xl group-hover:scale-110 transition-transform">⚠️</div>
-                <h3 class="text-xl font-bold mb-1 text-amber-300">الدروس المتراكمة</h3>
-                <p class="text-xs text-slate-400">تحديد فترة زمنية وإنقاذ الدروس المتأخرة</p>
+                <h3 class="text-xl font-bold mb-1 text-amber-300" id="card-backlog-title">الدروس المتراكمة</h3>
+                <p class="text-xs text-slate-400" id="card-backlog-desc">تحديد فترة زمنية وإنقاذ الدروس المتأخرة</p>
             </div>
 
             <div onclick="switchSection('plans')" class="glass-card rounded-2xl p-6 cursor-pointer hover:border-cyan-500/50 transition-all duration-300 group relative overflow-hidden">
                 <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-cyan-500/20 rounded-full blur-2xl group-hover:bg-cyan-500/40 transition-all"></div>
                 <div class="text-3xl mb-3 p-3 bg-cyan-500/20 w-fit rounded-xl group-hover:scale-110 transition-transform">📚</div>
-                <h3 class="text-xl font-bold mb-1 text-cyan-300">خطط الكتب والحل</h3>
-                <p class="text-xs text-slate-400">متابعة الكتب الخارجية والمستهدف الشهرية</p>
+                <h3 class="text-xl font-bold mb-1 text-cyan-300" id="card-plans-title">خطط الكتب والحل</h3>
+                <p class="text-xs text-slate-400" id="card-plans-desc">متابعة الكتب الخارجية والمستهدفات الشهرية</p>
             </div>
 
             <div onclick="switchSection('pomodoro')" class="glass-card rounded-2xl p-6 cursor-pointer hover:border-purple-500/50 transition-all duration-300 group relative overflow-hidden">
                 <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-purple-500/20 rounded-full blur-2xl group-hover:bg-purple-500/40 transition-all"></div>
                 <div class="text-3xl mb-3 p-3 bg-purple-500/20 w-fit rounded-xl group-hover:scale-110 transition-transform">⏱️</div>
-                <h3 class="text-xl font-bold mb-1 text-purple-300">مؤقت البومودورو</h3>
-                <p class="text-xs text-slate-400">جلسات تركيز واستراحة مع منبه صوتي</p>
+                <h3 class="text-xl font-bold mb-1 text-purple-300" id="card-pomo-title">مؤقت البومودورو</h3>
+                <p class="text-xs text-slate-400" id="card-pomo-desc">جلسات تركيز واستراحة مع منبه صوتي</p>
             </div>
 
             <div onclick="switchSection('tasks')" class="glass-card rounded-2xl p-6 cursor-pointer hover:border-emerald-500/50 transition-all duration-300 group relative overflow-hidden">
                 <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-emerald-500/20 rounded-full blur-2xl group-hover:bg-emerald-500/40 transition-all"></div>
                 <div class="text-3xl mb-3 p-3 bg-emerald-500/20 w-fit rounded-xl group-hover:scale-110 transition-transform">✅</div>
-                <h3 class="text-xl font-bold mb-1 text-emerald-300">المهام اليومية</h3>
-                <p class="text-xs text-slate-400">قائمة مهام تفاعلية مريحة للعين</p>
+                <h3 class="text-xl font-bold mb-1 text-emerald-300" id="card-tasks-title">المهام اليومية</h3>
+                <p class="text-xs text-slate-400" id="card-tasks-desc">قائمة مهام تفاعلية مريحة للعين</p>
             </div>
 
             <div onclick="switchSection('lessons')" class="glass-card rounded-2xl p-6 cursor-pointer hover:border-blue-500/50 transition-all duration-300 group relative overflow-hidden">
                 <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/40 transition-all"></div>
                 <div class="text-3xl mb-3 p-3 bg-blue-500/20 w-fit rounded-xl group-hover:scale-110 transition-transform">🏫</div>
-                <h3 class="text-xl font-bold mb-1 text-blue-300">جدول الدروس الأسبوعية</h3>
-                <p class="text-xs text-slate-400">تنظيم المواعيد والحصص الأسبوعية</p>
+                <h3 class="text-xl font-bold mb-1 text-blue-300" id="card-lessons-title">جدول الدروس الأسبوعية</h3>
+                <p class="text-xs text-slate-400" id="card-lessons-desc">تنظيم المواعيد والحصص الأسبوعية</p>
             </div>
 
             <div onclick="switchSection('matrix')" class="glass-card rounded-2xl p-6 cursor-pointer hover:border-rose-500/50 transition-all duration-300 group relative overflow-hidden">
                 <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-rose-500/20 rounded-full blur-2xl group-hover:bg-rose-500/40 transition-all"></div>
                 <div class="text-3xl mb-3 p-3 bg-rose-500/20 w-fit rounded-xl group-hover:scale-110 transition-transform">📊</div>
-                <h3 class="text-xl font-bold mb-1 text-rose-300">جدول المحاضرات</h3>
-                <p class="text-xs text-slate-400">مصفوفة إكسل لتتبع محاضرات كل مادة</p>
+                <h3 class="text-xl font-bold mb-1 text-rose-300" id="card-matrix-title">جدول المحاضرات</h3>
+                <p class="text-xs text-slate-400" id="card-matrix-desc">مصفوفة إكسل لتتبع محاضرات كل مادة</p>
             </div>
         </div>
 
         <!-- Back Button -->
         <div id="back-nav" class="mb-6 hidden">
-            <button onclick="switchSection('home')" class="glass-btn px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 text-cyan-300">
-                ⬅️ <span>العودة للرئيسية</span>
+            <button onclick="switchSection('home')" class="glass-btn px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 text-cyan-300 cursor-pointer">
+                ⬅️ <span id="back-home-text">العودة للرئيسية</span>
             </button>
         </div>
 
         <!-- SECTION: BACKLOG -->
         <section id="section-backlog" class="glass-card rounded-3xl p-6 sm:p-8 hidden">
             <div class="max-w-3xl mx-auto space-y-6">
-                <div>
-                    <h2 class="text-2xl font-black text-amber-300 mb-2">⚠️ جدول الدروس المتراكمة</h2>
-                    <p class="text-sm text-slate-400">اضف الدرس المتأخر وحدد له مهلة زمنية لإنجازه والتخلص منه.</p>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-amber-300 mb-1">⚠️ جدول الدروس المتراكمة</h2>
+                        <p class="text-sm text-slate-400">اضف الدرس المتأخر وحدد له مهلة زمنية لإنجازه.</p>
+                    </div>
+                    <div class="bg-slate-900/90 border border-amber-500/40 px-4 py-2 rounded-2xl text-center">
+                        <span class="text-xs text-slate-400 block">نسبة الإنجاز</span>
+                        <span id="backlog-progress-val" class="text-lg font-bold text-amber-300">0%</span>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -203,9 +215,15 @@ html_code = """
         <!-- SECTION: MONTHLY PLANS -->
         <section id="section-plans" class="glass-card rounded-3xl p-6 sm:p-8 hidden">
             <div class="max-w-3xl mx-auto space-y-6">
-                <div>
-                    <h2 class="text-2xl font-black text-cyan-300 mb-2">📚 خطة الحل المستهدفة والشهرية</h2>
-                    <p class="text-sm text-slate-400">حدد الكتب المدرسية والأنشطة المقررة شهرياً وموعد إنهاء كل كتاب.</p>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-cyan-300 mb-1">📚 خطة الحل المستهدفة والشهرية</h2>
+                        <p class="text-sm text-slate-400">حدد الكتب المدرسية والأنشطة المقررة شهرياً وموعد إنهاء كل كتاب.</p>
+                    </div>
+                    <div class="bg-slate-900/90 border border-cyan-500/40 px-4 py-2 rounded-2xl text-center">
+                        <span class="text-xs text-slate-400 block">نسبة الإنجاز</span>
+                        <span id="plans-progress-val" class="text-lg font-bold text-cyan-300">0%</span>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -274,9 +292,15 @@ html_code = """
         <!-- SECTION: TASKS -->
         <section id="section-tasks" class="glass-card rounded-3xl p-6 sm:p-8 hidden">
             <div class="max-w-2xl mx-auto space-y-6">
-                <div>
-                    <h2 class="text-2xl font-black text-emerald-300 mb-2">✅ إدارة المهام اليومية</h2>
-                    <p class="text-sm text-slate-400">اضف مهامك، اضغط على زر الإنجاز لتتحول للون الأخضر مع الشطب.</p>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-emerald-300 mb-1">✅ إدارة المهام اليومية</h2>
+                        <p class="text-sm text-slate-400">اضف مهامك، اضغط على زر الإنجاز لتتبع الإنجاز.</p>
+                    </div>
+                    <div class="bg-slate-900/90 border border-emerald-500/40 px-4 py-2 rounded-2xl text-center">
+                        <span class="text-xs text-slate-400 block">نسبة الإنجاز</span>
+                        <span id="tasks-progress-val" class="text-lg font-bold text-emerald-300">0%</span>
+                    </div>
                 </div>
 
                 <div class="flex gap-3">
@@ -293,7 +317,7 @@ html_code = """
             <div class="space-y-6">
                 <div>
                     <h2 class="text-2xl font-black text-blue-300 mb-2">🏫 جدول مواعيد الدروس الأسبوعية</h2>
-                    <p class="text-sm text-slate-400">نظم مواعيد دروسك وحصصك لكل يوم في الأسبوع بتصميم فخم وسهل.</p>
+                    <p class="text-sm text-slate-400">نظم مواعيد دروسك وحصصك لكل يوم في الأسبوع.</p>
                 </div>
 
                 <div id="lessons-days-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
@@ -305,7 +329,7 @@ html_code = """
             <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-md w-full border border-blue-500/30 space-y-5 shadow-2xl relative">
                 <div class="flex items-center justify-between border-b border-slate-700 pb-3">
                     <h3 id="modal-title" class="text-xl font-bold text-blue-300">إضافة / تعديل درس</h3>
-                    <button onclick="closeLessonModal()" class="text-slate-400 hover:text-white text-xl">✕</button>
+                    <button onclick="closeLessonModal()" class="text-slate-400 hover:text-white text-xl cursor-pointer">✕</button>
                 </div>
 
                 <div class="space-y-4">
@@ -320,10 +344,10 @@ html_code = """
                 </div>
 
                 <div class="flex gap-3 pt-2">
-                    <button onclick="saveLessonFromModal()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-600/30">
+                    <button type="button" onclick="saveLessonFromModal()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-600/30 cursor-pointer">
                         💾 حفظ الدرس
                     </button>
-                    <button onclick="closeLessonModal()" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold transition-all border border-slate-700">
+                    <button type="button" onclick="closeLessonModal()" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold transition-all border border-slate-700 cursor-pointer">
                         إلغاء
                     </button>
                 </div>
@@ -335,12 +359,16 @@ html_code = """
             <div class="space-y-6">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
-                        <h2 class="text-2xl font-black text-rose-300 mb-2">📊 مصفوفة المحاضرات التفاعلية</h2>
-                        <p class="text-sm text-slate-400">اضغط على أي خلية لتغيير حالتها (رمادي فارغ ➡️ أحمر غير منجز ➡️ أصفر منجز).</p>
+                        <h2 class="text-2xl font-black text-rose-300 mb-1">📊 مصفوفة المحاضرات التفاعلية</h2>
+                        <p class="text-sm text-slate-400">اضغط على أي خلية لتغيير حالتها (رمادي ➡️ أحمر ➡️ أصفر).</p>
                     </div>
                     <div class="flex items-center gap-3">
-                        <button type="button" onclick="addLectureRow()" class="glass-btn px-4 py-2 rounded-xl font-bold text-xs text-rose-300 cursor-pointer">➕ إضافة صف جديد</button>
-                        <button type="button" onclick="resetMatrix()" class="glass-btn px-4 py-2 rounded-xl font-bold text-xs text-slate-400 cursor-pointer">🔄 إعادة ضبط</button>
+                        <div class="bg-slate-900/90 border border-rose-500/40 px-3 py-1.5 rounded-xl text-center">
+                            <span class="text-[10px] text-slate-400 block">الإنجاز</span>
+                            <span id="matrix-progress-val" class="text-sm font-bold text-rose-300">0%</span>
+                        </div>
+                        <button type="button" onclick="addLectureRow()" class="glass-btn px-3 py-2 rounded-xl font-bold text-xs text-rose-300 cursor-pointer">➕ صف جديد</button>
+                        <button type="button" onclick="resetMatrix()" class="glass-btn px-3 py-2 rounded-xl font-bold text-xs text-slate-400 cursor-pointer">🔄 إعادة</button>
                     </div>
                 </div>
 
@@ -358,9 +386,85 @@ html_code = """
     </div>
 
     <script>
-        const dayNames = {
-            sat: "السبت", sun: "الأحد", mon: "الإثنين", tue: "الثلاثاء", wed: "الأربعاء", thu: "الخميس", fri: "الجمعة"
+        // --- MULTI-LANGUAGE DICTIONARY ---
+        const translations = {
+            ar: {
+                app_title: "المنظم الذكي",
+                app_subtitle: "نظام إنتاجية متطور مع إحصاءات الإنجاز الشاملة",
+                lang_btn_text: "English",
+                global_prog_label: "📊 نسبة الإنجاز الإجمالية للتطبيق",
+                back_home_text: "العودة للرئيسية",
+                card_backlog_title: "الدروس المتراكمة",
+                card_backlog_desc: "تحديد فترة زمنية وإنقاذ الدروس المتأخرة",
+                card_plans_title: "خطط الكتب والحل",
+                card_plans_desc: "متابعة الكتب الخارجية والمستهدفات الشهرية",
+                card_pomo_title: "مؤقت البومودورو",
+                card_pomo_desc: "جلسات تركيز واستراحة مع منبه صوتي",
+                card_tasks_title: "المهام اليومية",
+                card_tasks_desc: "قائمة مهام تفاعلية مريحة للعين",
+                card_lessons_title: "جدول الدروس الأسبوعية",
+                card_lessons_desc: "تنظيم المواعيد والحصص الأسبوعية",
+                card_matrix_title: "جدول المحاضرات",
+                card_matrix_desc: "مصفوفة إكسل لتتبع محاضرات كل مادة",
+                sat: "السبت", sun: "الأحد", mon: "الإثنين", tue: "الثلاثاء", wed: "الأربعاء", thu: "الخميس", fri: "الجمعة"
+            },
+            en: {
+                app_title: "Smart Organizer",
+                app_subtitle: "Advanced Productivity System with Comprehensive Progress",
+                lang_btn_text: "العربية",
+                global_prog_label: "📊 Overall Application Progress",
+                back_home_text: "Back to Dashboard",
+                card_backlog_title: "Backlog Lessons",
+                card_backlog_desc: "Set timeframes and conquer overdue lessons",
+                card_plans_title: "Books & Study Plans",
+                card_plans_desc: "Track external books and monthly targets",
+                card_pomo_title: "Pomodoro Timer",
+                card_pomo_desc: "Focus and break sessions with audio chime",
+                card_tasks_title: "Daily Tasks",
+                card_tasks_desc: "Interactive task list to keep you on track",
+                card_lessons_title: "Weekly Lessons",
+                card_lessons_desc: "Organize weekly subject times and classes",
+                card_matrix_title: "Lecture Matrix",
+                card_matrix_desc: "Excel-like matrix to track lectures per subject",
+                sat: "Saturday", sun: "Sunday", mon: "Monday", tue: "Tuesday", wed: "Wednesday", thu: "Thursday", fri: "Friday"
+            }
         };
+
+        let currentLang = localStorage.getItem('smart_org_lang') || 'ar';
+
+        function applyLanguage() {
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            
+            const t = translations[currentLang];
+            document.getElementById('app-title').textContent = t.app_title;
+            document.getElementById('app-subtitle').textContent = t.app_subtitle;
+            document.getElementById('lang-btn-text').textContent = t.lang_btn_text;
+            document.getElementById('global-prog-label').textContent = t.global_prog_label;
+            document.getElementById('back-home-text').textContent = t.back_home_text;
+            
+            document.getElementById('card-backlog-title').textContent = t.card_backlog_title;
+            document.getElementById('card-backlog-desc').textContent = t.card_backlog_desc;
+            document.getElementById('card-plans-title').textContent = t.card_plans_title;
+            document.getElementById('card-plans-desc').textContent = t.card_plans_desc;
+            document.getElementById('card-pomo-title').textContent = t.card_pomo_title;
+            document.getElementById('card-pomo-desc').textContent = t.card_pomo_desc;
+            document.getElementById('card-tasks-title').textContent = t.card_tasks_title;
+            document.getElementById('card-tasks-desc').textContent = t.card_tasks_desc;
+            document.getElementById('card-lessons-title').textContent = t.card_lessons_title;
+            document.getElementById('card-lessons-desc').textContent = t.card_lessons_desc;
+            document.getElementById('card-matrix-title').textContent = t.card_matrix_title;
+            document.getElementById('card-matrix-desc').textContent = t.card_matrix_desc;
+
+            renderLessons();
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('smart_org_lang', currentLang);
+            applyLanguage();
+        }
+
         const dayKeys = ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'];
 
         function switchSection(sectionId) {
@@ -382,19 +486,50 @@ html_code = """
             }
         }
 
-        // --- GLOBAL PROGRESS LOGIC ---
+        // --- GLOBAL & SECTIONAL PROGRESS LOGIC ---
         function calculateGlobalProgress() {
-            let totalItems = 0;
-            let completedItems = 0;
+            let total = 0;
+            let completed = 0;
 
-            tasks.forEach(t => { totalItems++; if(t.completed) completedItems++; });
-            backlogItems.forEach(b => { totalItems++; if(b.completed) completedItems++; });
-            planItems.forEach(p => { totalItems++; if(p.completed) completedItems++; });
+            // 1. Tasks Progress
+            let tasksTotal = tasks.length;
+            let tasksDone = tasks.filter(t => t.completed).length;
+            let tasksPct = tasksTotal === 0 ? 0 : Math.round((tasksDone / tasksTotal) * 100);
+            const tasksValEl = document.getElementById('tasks-progress-val');
+            if(tasksValEl) tasksValEl.textContent = `${tasksPct}%`;
 
-            const percentage = totalItems === 0 ? 0 : Math.round((completedItems / totalItems) * 100);
+            // 2. Backlog Progress
+            let backlogTotal = backlogItems.length;
+            let backlogDone = backlogItems.filter(b => b.completed).length;
+            let backlogPct = backlogTotal === 0 ? 0 : Math.round((backlogDone / backlogTotal) * 100);
+            const backlogValEl = document.getElementById('backlog-progress-val');
+            if(backlogValEl) backlogValEl.textContent = `${backlogPct}%`;
+
+            // 3. Plans Progress
+            let plansTotal = planItems.length;
+            let plansDone = planItems.filter(p => p.completed).length;
+            let plansPct = plansTotal === 0 ? 0 : Math.round((plansDone / plansTotal) * 100);
+            const plansValEl = document.getElementById('plans-progress-val');
+            if(plansValEl) plansValEl.textContent = `${plansPct}%`;
+
+            // 4. Matrix Progress
+            let matrixTotalCells = matrixRowsCount * 5;
+            let matrixDoneCells = 0;
+            for(let key in matrixData) {
+                if(matrixData[key] === 1 || matrixData[key] === 2) matrixDoneCells++;
+            }
+            let matrixPct = matrixTotalCells === 0 ? 0 : Math.round((matrixDoneCells / matrixTotalCells) * 100);
+            const matrixValEl = document.getElementById('matrix-progress-val');
+            if(matrixValEl) matrixValEl.textContent = `${matrixPct}%`;
+
+            // Combined Global
+            total = tasksTotal + backlogTotal + plansTotal + matrixTotalCells;
+            completed = tasksDone + backlogDone + plansDone + matrixDoneCells;
+
+            const globalPct = total === 0 ? 0 : Math.round((completed / total) * 100);
             
-            document.getElementById('global-progress-percent').textContent = `${percentage}%`;
-            document.getElementById('global-progress-bar').style.width = `${percentage}%`;
+            document.getElementById('global-progress-percent').textContent = `${globalPct}%`;
+            document.getElementById('global-progress-bar').style.width = `${globalPct}%`;
         }
 
         // --- BACKLOG LOGIC ---
@@ -583,8 +718,8 @@ html_code = """
                             <div class="text-xs text-slate-400 mt-0.5">⏰ ${l.time}</div>
                         </div>
                         <div class="flex items-center gap-1">
-                            <button onclick="openEditLessonModal('${day}', ${l.id})" class="p-1 text-slate-400 hover:text-blue-400 text-xs">✏️</button>
-                            <button onclick="deleteLesson('${day}', ${l.id})" class="p-1 text-slate-400 hover:text-rose-400 text-xs">🗑️</button>
+                            <button type="button" onclick="openEditLessonModal('${day}', ${l.id})" class="p-1 text-slate-400 hover:text-blue-400 text-xs cursor-pointer">✏️</button>
+                            <button type="button" onclick="deleteLesson('${day}', ${l.id})" class="p-1 text-slate-400 hover:text-rose-400 text-xs cursor-pointer">🗑️</button>
                         </div>
                     </div>
                 `).join('');
@@ -592,12 +727,12 @@ html_code = """
                 dayCard.innerHTML = `
                     <div>
                         <div class="flex items-center justify-between border-b border-slate-700 pb-3 mb-3">
-                            <h4 class="font-bold text-lg text-slate-100">${dayNames[day]}</h4>
+                            <h4 class="font-bold text-lg text-slate-100">${translations[currentLang][day]}</h4>
                             <span class="text-xs bg-blue-500/20 text-blue-300 px-2.5 py-1 rounded-lg font-bold">${dayLessons.length}</span>
                         </div>
                         <div class="space-y-2 max-h-48 overflow-y-auto">${listHtml || '<p class="text-xs text-slate-500 py-2">لا يوجد دروس مضافة</p>'}</div>
                     </div>
-                    <button onclick="openAddLessonModal('${day}')" class="mt-4 w-full py-2 bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/30 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1 cursor-pointer">
+                    <button type="button" onclick="openAddLessonModal('${day}')" class="mt-4 w-full py-2 bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/30 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1 cursor-pointer">
                         ➕ إضافة درس
                     </button>
                 `;
@@ -691,7 +826,7 @@ html_code = """
                 
                 for (let c = 0; c < 5; c++) {
                     const key = `${r}_${c}`;
-                    const state = matrixData[key] || 0; // 0: empty, 1: red, 2: yellow
+                    const state = matrixData[key] || 0;
                     
                     let bgClass = "bg-slate-800/30 text-slate-500 hover:bg-slate-800/80";
                     let stateText = "";
@@ -716,6 +851,7 @@ html_code = """
 
             localStorage.setItem('smart_org_matrix_data', JSON.stringify(matrixData));
             localStorage.setItem('smart_org_matrix_rows', matrixRowsCount);
+            calculateGlobalProgress();
         }
 
         function cycleCellState(row, col) {
@@ -736,8 +872,9 @@ html_code = """
             renderMatrixBody();
         }
 
-        // --- ENTER KEY SUPPORT FOR FAST ADDING ---
-        document.addEventListener('DOMContentLoaded', () => {
+        // --- INIT & ENTER KEY SUPPORT ---
+        window.addEventListener('DOMContentLoaded', () => {
+            applyLanguage();
             renderBacklog();
             renderPlans();
             renderTasks();
